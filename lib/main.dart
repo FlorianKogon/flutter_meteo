@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/cupertino.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -29,9 +35,17 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  List<String> cities = ["Paris", "Bordeaux", "Nantes"];
+  List<String> cities = [];
 
   String chosenCity;
+
+  String key = "cities";
+
+  @override
+  void initState() {
+    super.initState();
+    get();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +88,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 String city = cities[i - 2];
                 return ListTile(
                   title: textWithStyle(city),
+                  trailing: IconButton(
+                    icon: Icon(Icons.delete, color: Colors.white),
+                    onPressed: () => delete(city),
+                    ),
                   onTap: () {
                     setState(() {
                       chosenCity = city;
@@ -113,7 +131,9 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             CupertinoTextField(
               placeholder: 'Ville',
+              autofocus: true,
               onSubmitted: (String string) {
+                add(string);
                 Navigator.pop(context);
               },
             ),
@@ -122,5 +142,29 @@ class _MyHomePageState extends State<MyHomePage> {
       },
       context: context
     );
+  }
+
+  void get() async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    List<String> list = await sharedPreferences.getStringList(key);
+    if (list != null) {
+      setState(() {
+        cities = list;
+      });
+    }
+  }
+
+  void add(String string) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    cities.add(string);
+    await sharedPreferences.setStringList(key, cities);
+    get();
+  }
+
+  void delete(String string) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    cities.remove(string);
+    await sharedPreferences.setStringList(key, cities);
+    get();
   }
 }
