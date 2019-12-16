@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
+import 'package:location/location.dart';
 
 void main() {
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
@@ -41,10 +42,34 @@ class _MyHomePageState extends State<MyHomePage> {
 
   String key = "cities";
 
+  Location location;
+  LocationData locationData;
+  Stream<LocationData> stream;
+
   @override
   void initState() {
     super.initState();
     get();
+    location = Location();
+    listenToStream();
+  }
+
+  //Once
+  getFirstLocation() async {
+    try {
+      locationData = await location.getLocation();
+      print("Nouvelle position : ${locationData.latitude} / ${locationData.longitude}");
+    } catch(e) {
+      print("Nous avons une erreur : $e");
+    }
+  }
+
+  //Each change
+  listenToStream() async {
+    stream = location.onLocationChanged();
+    stream.listen((newPosition) {
+      print("New => ${newPosition.latitude} --- ${newPosition.longitude}");
+    });
   }
 
   @override
