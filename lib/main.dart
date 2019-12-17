@@ -48,6 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String key = "Villes";
   List<String> cities = [];
   String chosenCity;
+  String nameCurrent = "Ville Actuelle";
 
   Location location;
   LocationData locationData;
@@ -95,11 +96,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
               } else if (i == 1) {
                 return new ListTile(
-                  title: styledText("Ma ville actuelle"),
+                  title: styledText(nameCurrent),
                   onTap: () {
                     setState(() {
                       chosenCity = null;
                       coordChosenCity = null;
+                      apiCall();
                       Navigator.pop(context);
                     });
                   },
@@ -126,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       body: (temperature == null)
-        ? Center(child: Text((chosenCity == null)? "Ville actuelle": chosenCity))
+        ? Center(child: Text((chosenCity == null)? nameCurrent: chosenCity))
         : Container(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
@@ -136,7 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            styledText((chosenCity == null)? "Ville Actuelle" : chosenCity, fontSize: 40.0),
+            styledText((chosenCity == null)? nameCurrent : chosenCity, fontSize: 40.0),
             styledText(temperature.description, fontSize: 30.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -283,7 +285,10 @@ class _MyHomePageState extends State<MyHomePage> {
     if (locationData != null) {
       Coordinates coordinates = Coordinates(locationData.latitude, locationData.longitude);
       final cityName = await Geocoder.local.findAddressesFromCoordinates(coordinates);
-      apiCall();
+      setState(() {
+        nameCurrent = cityName.first.locality;
+        apiCall();
+      });
     }
   }
 
