@@ -65,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     getSharedPreferences();
     location = Location();
-    //getFirstLocation();
+    getFirstLocation();
     listenToStream();
   }
 
